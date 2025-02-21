@@ -6,17 +6,22 @@ VHOSTS_CONF="/opt/homebrew/etc/httpd/extra/httpd-vhosts.conf"
 DOC_ROOT="/opt/homebrew/var/www"
 HTPASSWD_FILE="/opt/homebrew/etc/httpd/.htpasswd"
 
-# Install Apache using Homebrew
-echo "Installing Apache..."
-# brew install httpd
+# Install Apache using Homebrew if not already installed
+if ! brew list httpd &> /dev/null
+then
+    echo "Installing Apache..."
+    brew install httpd
+else
+    echo "Apache is already installed. Skipping installation..."
+fi
 
 # Create directories and html files
 echo "Creating directories and html files..."
 mkdir -p "$DOC_ROOT/site1" "$DOC_ROOT/site2"
-echo "<h1>Welcome to site1.local</h1>" > "$DOC_ROOT/site1/index.html"
-echo "<h1>Welcome to site2.local</h1>" > "$DOC_ROOT/site2/index.html"
+echo "<h1>Welcome to site1.localhost</h1>" > "$DOC_ROOT/site1/index.html"
+echo "<h1>Welcome to site2.localhost</h1>" > "$DOC_ROOT/site2/index.html"
 echo "<h1>This is a custom 404 error page</h1>" > "$DOC_ROOT/site1/404.html"
-echo "<h1>This is a custom 404 error page</h1>" > "$DOC_ROOT/site1/404.html"
+echo "<h1>This is a custom 404 error page</h1>" > "$DOC_ROOT/site2/404.html"
 
 # Enable Virtual Hosts in Apache configuration
 if grep -q "^#Include $VHOSTS_CONF" "$APACHE_CONF"
@@ -40,12 +45,23 @@ then
 fi
 
 # Create username and password for basic authentication
+USERNAME="${APACHE_USERNAME:-}"
+PASSWORD="${APACHE_PASSWORD:-}"
+
+if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ] # Check if variables are empty
+then
+    # In the terminal, run: export APACHE_USERNAME="username" APACHE_PASSWORD="password" or else it'll exit
+    echo "Error: APACHE_USERNAME and APACHE_PASSWORD environment variables must be set."
+    exit 1
+fi
+
 echo "Creating a username and password for basic authentication..."
-read -p "Enter a username: " USERNAME
-read -s -p "Enter a password: " PASSWORD
-echo
 sudo htpasswd -bc "$HTPASSWD_FILE" "$USERNAME" "$PASSWORD"
 echo "Password file created at $HTPASSWD_FILE"
+# read -p "Enter a username: " USERNAME
+# read -s -p "Enter a password: " PASSWORD
+# echo
+# sudo htpasswd -bc "$HTPASSWD_FILE" "$USERNAME" "$PASSWORD"
 
 # Configure Apache Virtual Hosts for multi-site hosting and authentication
 echo "Configuring Virtual Hosts..."
@@ -80,4 +96,4 @@ EOL
 # Step 10: Restart Apache to apply changes
 echo "Restarting Apache..."
 brew services restart httpd
-echo "Setup complete! Try accessing site1.local:8080, site2.local:8080 and a non-existent page in your browser."
+echo "Setup complete! Try accessing site1.localhost:8080, site2.localhost:8080 and a non-existent page in your browser."
