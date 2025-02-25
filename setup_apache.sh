@@ -17,13 +17,14 @@ else
     echo "Apache is already installed. Skipping installation..."
 fi
 
-# Create directories and html files
-# echo "Creating directories and html files..."
-# mkdir -p "$DOC_ROOT/site1" "$DOC_ROOT/site2"
-# echo "<h1>Welcome to site1.localhost</h1>" > "$DOC_ROOT/site1/index.html"
-# echo "<h1>Welcome to site2.localhost</h1>" > "$DOC_ROOT/site2/index.html"
-# echo "<h1>This is a custom 404 error page</h1>" > "$DOC_ROOT/site1/404.html"
-# echo "<h1>This is a custom 404 error page</h1>" > "$DOC_ROOT/site2/404.html"
+Create directories and html files
+echo "Creating directories and html files..."
+mkdir -p "$DOC_ROOT/site1" "$DOC_ROOT/site2"
+echo "<h1>Welcome to site1.localhost</h1>" > "$DOC_ROOT/site1/index.html"
+echo "<h1>Welcome to site2.localhost</h1>" > "$DOC_ROOT/site2/index.html"
+echo "<h1>This is a custom 404 error page</h1>" > "$DOC_ROOT/site1/404.html"
+echo "<h1>This is a custom 404 error page</h1>" > "$DOC_ROOT/site2/404.html"
+cp -r /Users/jshizuki/Downloads/html5up-dimension /opt/homebrew/var/www/site3
 
 enable_apache_config() {
   local pattern="$1"
