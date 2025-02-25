@@ -17,7 +17,7 @@ else
     echo "Apache is already installed. Skipping installation..."
 fi
 
-Create directories and html files
+# Create directories and html files
 echo "Creating directories and html files..."
 mkdir -p "$DOC_ROOT/site1" "$DOC_ROOT/site2"
 echo "<h1>Welcome to site1.localhost</h1>" > "$DOC_ROOT/site1/index.html"
@@ -55,7 +55,13 @@ enable_apache_config "Include $SSL_CONF" "Enabling SSL configuration in configur
 
 # CACHING: Enable mod_expires in Apache configuration for caching
 enable_apache_config "LoadModule expires_module" "Enabling mod_expires..."
-enable_apache_config  "LoadModule headers_module" "Enabling mod_headers..."
+
+# Enable LOAD BALANCING IN APACHE_CONF
+enable_apache_config "LoadModule slotmem_shm_module" "Enabling mod_slotmem_shm..."
+enable_apache_config "LoadModule proxy_module" "Enabling mod_proxy..."
+enable_apache_config "LoadModule proxy_balancer_module" "Enabling mod_proxy_balancer..."
+enable_apache_config "LoadModule proxy_http_module" "Enabling mod_proxy_http..."
+enable_apache_config "LoadModule lbmethod_bytraffic_module" "Enabling mod_lbmethod_bytraffic..."
 
 # Get username and password from environment variables for basic authentication
 USERNAME="${APACHE_USERNAME:-}"
@@ -125,6 +131,20 @@ cat <<EOL > "$VHOSTS_CONF"
             Header unset ETag
         </IfModule>
     </Directory>
+</VirtualHost>
+
+<VirtualHost *:8080>
+    ServerName loadbalancer.localhost
+
+    <Proxy "balancer://mycluster">
+        BalancerMember http://site1.localhost:8080
+        BalancerMember http://site2.localhost:8080
+        ProxySet lbmethod=bytraffic
+    </Proxy>
+
+    ProxyPass "/" "balancer://mycluster/"
+    ProxyPassReverse "/" "balancer://mycluster/"
+
 </VirtualHost>
 EOL
 
