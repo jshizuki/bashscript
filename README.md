@@ -32,3 +32,9 @@ You can access the configured sites using the following URLs:
 
 ### Load Balancing
 - [http://loadbalancer.localhost:8080](http://loadbalancer.localhost:8080)
+
+### Watch the Demo
+
+For a detailed walkthrough of this exercise, watch the demo video by clicking the image below:
+
+[![Watch the video](https://img.youtube.com/vi/xNIBgYdcHKQ/0.jpg)](https://youtu.be/xNIBgYdcHKQ)
