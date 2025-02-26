@@ -8,7 +8,7 @@ DOC_ROOT="/opt/homebrew/var/www"
 HTPASSWD_FILE="/opt/homebrew/etc/httpd/.htpasswd"
 SSL_CONF="/opt/homebrew/etc/httpd/extra/httpd-ssl.conf"
 
-# Install Apache using Homebrew if not already installed
+# Install Apache with Homebrew if not already installed
 if ! brew list httpd &> /dev/null
 then
     echo "Installing Apache..."
@@ -26,7 +26,7 @@ echo "<h1>This is a custom 404 error page</h1>" > "$DOC_ROOT/site1/404.html"
 echo "<h1>This is a custom 404 error page</h1>" > "$DOC_ROOT/site2/404.html"
 cp -r /Users/jshizuki/Downloads/html5up-dimension /opt/homebrew/var/www/site3
 
-enable_apache_config() {
+uncomment() {
   local pattern="$1"
   local message="$2"
 
@@ -39,45 +39,51 @@ enable_apache_config() {
   fi
 }
 
-# VIRTUAL HOST: Enable Virtual Hosts in Apache configuration
-enable_apache_config "Include $VHOSTS_CONF" "Enabling Virtual Hosts in configuration file..."
+enable_apache_modules() {
+  for module in "$@"; do
+    uncomment "LoadModule $module" "Enabling $module..."
+  done
+}
 
-# BASIC AUTH: Enable basic authentication in Apache configuration
-enable_apache_config "LoadModule auth_basic_module" "Enabling mod_auth_basic..."
+include_apache_configs() {
+  for config in "$@"; do
+    uncomment "Include $config" "Including $config..."
+  done
+}
 
-# CUSTOM ERROR PAGE: Enable alias_module in Apache configuration for custom error pages
-enable_apache_config "LoadModule vhost_alias_module" "Enabling vhosts_alias_module..."
+# Enable VIRTUAL HOSTS in APACHE_CONF
+include_apache_configs "$VHOSTS_CONF"
 
-# HTTPS: Enable the below in Apache configuration for HTTPS
-enable_apache_config "LoadModule ssl_module" "Enabling ssl_module..."
-enable_apache_config "LoadModule socache_shmcb_module" "Enabling socache_shmcb_module..."
-enable_apache_config "Include $SSL_CONF" "Enabling SSL configuration in configuration file..."
+# Enable BASIC AUTH in APACHE_CONF
+enable_apache_modules "auth_basic_module"
 
-# CACHING: Enable mod_expires in Apache configuration for caching
-enable_apache_config "LoadModule expires_module" "Enabling mod_expires..."
+# Enable CUSTOM ERROR PAGES in APACHE_CONF
+enable_apache_modules "vhost_alias_module"
 
-# Enable LOAD BALANCING IN APACHE_CONF
-enable_apache_config "LoadModule slotmem_shm_module" "Enabling mod_slotmem_shm..."
-enable_apache_config "LoadModule proxy_module" "Enabling mod_proxy..."
-enable_apache_config "LoadModule proxy_balancer_module" "Enabling mod_proxy_balancer..."
-enable_apache_config "LoadModule proxy_http_module" "Enabling mod_proxy_http..."
-enable_apache_config "LoadModule lbmethod_bytraffic_module" "Enabling mod_lbmethod_bytraffic..."
+# Enable HTTPS in APACHE_CONF
+enable_apache_modules "ssl_module" "socache_shmcb_module"
+include_apache_configs "$SSL_CONF"
 
-# Get username and password from environment variables for basic authentication
+# Enable CLIENT-SIDE CACHING in APACHE_CONF
+enable_apache_modules "expires_module" "headers_module"
+
+# Enable LOAD-BALANCING in APACHE_CONF
+enable_apache_modules "slotmem_shm_module" "proxy_module" "proxy_balancer_module" "proxy_http_module" "lbmethod_bytraffic_module"
+
+# BASIC AUTH - Get username and password from environment variables
+
 USERNAME="${APACHE_USERNAME:-}"
 PASSWORD="${APACHE_PASSWORD:-}"
 
-if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ] # Check if variables are empty
-then
-    # In the terminal, run: export APACHE_USERNAME="username" APACHE_PASSWORD="password" or else it'll exit
+if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then # Check if variables are empty
+    # In the terminal, run: export APACHE_USERNAME=username APACHE_PASSWORD=password
     echo "Error: APACHE_USERNAME and APACHE_PASSWORD environment variables must be set."
     exit 1
 fi
 
 echo "Creating a username and password for basic authentication..."
 
-if [ -f "$HTPASSWD_FILE" ]
-then
+if [ -f "$HTPASSWD_FILE" ]; then
     echo "Password file already exists. Skipping..."
 else
     sudo htpasswd -bc "$HTPASSWD_FILE" "$USERNAME" "$PASSWORD"
@@ -160,7 +166,7 @@ else
     openssl x509 -req -days 365 -in "$APACHE_ROOT/server.csr" -signkey "$APACHE_ROOT/server.key" -out "$APACHE_ROOT/server.crt"
 fi
 
-# Configure SSL in Apache configuration
+# Configure SSL in SSL_CONF
 echo "Configuring SSL for site1..."
 
 echo "Commenting out the entire SSL VirtualHost block..."
