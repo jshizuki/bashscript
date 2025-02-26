@@ -187,4 +187,4 @@ EOL
 # Restart Apache to apply changes
 echo "Restarting Apache..."
 brew services restart httpd
-echo "Setup complete! Try accessing site1.localhost:8080, site2.localhost:8080, site1.localhost:8443 and a non-existent page in your browser."
+echo "Setup complete!"

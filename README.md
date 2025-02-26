@@ -4,25 +4,31 @@ This repository contains a bash script I created to automate the setup and confi
 
 ## Features
 - Automated Apache installation
-- Virtual host configuration
-- Permission setup
+- Permission setup (basic auth)
+- Custom error page configuration
+- Virtual host configuration for multi-site hosting
 - HTTPS configuration
 - Client-side caching
 - Load Balancing
 
-## Usage
-Pre-requisite: Please download a static package from [HTML5 UP](https://html5up.net/)
-
-To use the script, simply run it with the appropriate permissions:
-```bash
-sudo ./setup_apache.sh
-```
-
-Make sure you have the necessary privileges to execute the script and make changes to your system configuration.
-
 ## Requirements
+- Please download a static package from [HTML5 UP](https://html5up.net/)
 - Bash shell
 - Root or sudo privileges
 
-## License
-This project is licensed under the MIT License.
+## Accessing the Setup
+
+You can access the configured sites using the following URLs:
+
+### Basic Auth, Multi-Site Hosting & Custom Error Page
+- [http://site1.localhost:8080](http://site1.localhost:8080)
+- [http://site2.localhost:8080](http://site2.localhost:8080)
+
+### HTTPS
+- [https://site1.localhost:8443](https://site1.localhost:8443)
+
+### Client-Side Caching
+- [http://site3.localhost:8080](http://site3.localhost:8080)
+
+### Load Balancing
+- [http://loadbalancer.localhost:8080](http://loadbalancer.localhost:8080)
